@@ -28,13 +28,11 @@ CREATE TABLE movies (
   movieId           char(9) not null,
   title             varchar2(100) not null,
   movieYear         char(4),
-  director          char(9) not null,
+  directorId          char(9) not null,
   genre             varchar2(50) not null,
   runtime           char(6),                    --if wanna do in minutes?
-  rating            char(3),                    --forgot if keeping this in, percentage or 1-5 scale?
   summary           varchar2(200),
   castId            char(9),
-  avgUserRating     char(3),                   --percentage or likert scale?
   productionCompany varchar2(50) not null,
   primary key (movieId),
   foreign key (castId) references castInfo (actorId),
@@ -44,9 +42,9 @@ CREATE TABLE movies (
 
 DROP TABLE castInfo CASCADE CONSTRAINTS;
 CREATE TABLE castInfo (
-  actorId           char(9),
   actor_fname       varchar2(50) not null,
   actor_lname       varchar2(50) not null,
+  actorId           char(9),
   actor_bday        date,
   movieId           char(9),
   primary key       (actorId),
@@ -55,20 +53,20 @@ CREATE TABLE castInfo (
 
 DROP TABLE director CASCADE CONSTRAINTS;
 CREATE TABLE director (
-  directorId        char(9),
   director_fname    varchar2(50) not null,
   director_lname    varchar2(50) not null,
+  directorId        char(9),
   director_bday     date,
   movieId           char(9),
   primary key       (directorId),
   foreign key (movieId) references movies (movieID)
 );
 
-DROP TABLE productionCompany CASCADE CONSTRAINTS;
+--DROP TABLE productionCompany CASCADE CONSTRAINTS;
 CREATE TABLE productionCompany (
   productionName    varchar(50) not null,
   movieId           char(9),
-  address           varchar2(100),
+  address           varchar2(150),
   primary key       (productionName), 
   foreign key (movieId) references movies (movieId)
 );
@@ -82,21 +80,10 @@ CREATE TABLE reviews (
   primary key       (reviewId), 
   foreign key (movieId) references movies (movieId),
   foreign key (profileId) references profile (profileId)
+  --foreign key (reviewId) references profile (accountId)?
 );  
 
-DROP TABLE matchPercentage CASCADE CONSTRAINTS;
-CREATE TABLE matchPercentage (
-  matchId           char(9),
-  movieId           char(9),
-  profileId         char(9),
-  watchHistory      varchar2(15),
-  suggestedMovie    varchar2(50),  --name of suggested movie title?
-  primary key       (matchId, movieId),
-  foreign key (movieId) references movies (movieId),
-  foreign key (profileId) references profile (profileId)
-);
-
-DROP TABLE watchlater CASCADE CONSTRAINTS;
+DROP TABLE watchLater CASCADE CONSTRAINTS;
 CREATE TABLE watchLater (
   movieId           char(9),
   profileId         char(9),

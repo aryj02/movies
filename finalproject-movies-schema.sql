@@ -1,6 +1,3 @@
-//need to add FOREIGN KEYS, uniqueIds, check primary/reference keys & syntax
-//not sure if we're still keeping reviews, matchPercentage, watchLater, trendingList tables & need to add suggestedMovie tables?
-
 DROP TABLE account CASCADE CONSTRAINTS;
 CREATE TABLE account (
   fname             varchar2(15) not null, 
@@ -18,7 +15,7 @@ CREATE TABLE profile (
   accountId         char(9),
   profileId         char(9),                    
   pg13              char(1),
-  watchHistory      varchar2(15),      --change to boolean??
+  watchHistory      char(1),     
   primary key       (profileId),
   foreign key       (accountId) references account (userId)   
 );
@@ -28,8 +25,9 @@ CREATE TABLE movies (
   movieId           char(9) not null,
   title             varchar2(100) not null,
   movieYear         char(4),
-  director          char(9) not null,
+  directorId        char(9) not null,
   genre             varchar2(50) not null,
+<<<<<<< HEAD
   runtime           char(6),                    --if wanna do in minutes?            --forgot if keeping this in, percentage or 1-5 scale?
   summary           varchar2(200),
   castId            char(9),
@@ -40,6 +38,16 @@ CREATE TABLE movies (
   foreign key (castId) references castInfo (actorId),
   foreign key (director) references director (directorId),
   foreign key (productionCompany) references productionCompany (productionName)
+=======
+  runtime           char(6),                    --if wanna do in minutes?
+  summary           varchar2(1000),
+  leadingActorId    char(9),
+  productionCompany varchar2(50) not null,
+  primary key (movieId),
+  unique (leadingActorId),
+  unique (directorId),
+  unique (productionCompany)
+>>>>>>> 9652a8f463189ae94d616cd8c5181402f52a2e9d
 );
 
 DROP TABLE castInfo CASCADE CONSTRAINTS;
@@ -48,20 +56,22 @@ CREATE TABLE castInfo (
   actor_fname       varchar2(50) not null,
   actor_lname       varchar2(50) not null,
   actor_bday        date,
-  movieId           char(9),
-  primary key       (actorId),
-  foreign key (movieId) references movies (movieID)
+  movieId           char(9) not null,
+  primary key       (actor_fname, actor_lname),
+  foreign key (movieId) references movies (movieId),
+  foreign key (actorId) references movies (leadingActorId)
 );
 
 DROP TABLE director CASCADE CONSTRAINTS;
 CREATE TABLE director (
-  directorId        char(9),
+  directorId        char(9) not null,
   director_fname    varchar2(50) not null,
   director_lname    varchar2(50) not null,
   director_bday     date,
   movieId           char(9),
   primary key       (directorId),
-  foreign key (movieId) references movies (movieID)
+  foreign key (movieId) references movies (movieID),
+  foreign key (directorId) references movies (directorId)
 );
 
 DROP TABLE productionCompany CASCADE CONSTRAINTS;
@@ -70,14 +80,15 @@ CREATE TABLE productionCompany (
   movieId           char(9),
   address           varchar2(100),
   primary key       (productionName), 
-  foreign key (movieId) references movies (movieId)
+  foreign key (movieId) references movies (movieId),
+  foreign key (productionName) references movies (productionCompany)
 );
 
 DROP TABLE reviews CASCADE CONSTRAINTS;
 CREATE TABLE reviews (
   reviewId          char(9),
   profileId         char(9),
-  starRating        char(5),
+  starRating        int,
   movieId           char(9),
   primary key       (reviewId), 
   foreign key (movieId) references movies (movieId),
@@ -91,6 +102,7 @@ CREATE TABLE watchLater (
   primary key       (movieId, profileId),
   foreign key (movieId) references movies (movieId),
   foreign key (profileId) references profile (profileId)
+<<<<<<< HEAD
 );
 
 --queries:
@@ -117,3 +129,6 @@ SELECT m.title
 FROM movies m, reviews r
 GROUP BY r.movieID
 WHERE avg(r.starRating) > 4;
+=======
+);
+>>>>>>> 9652a8f463189ae94d616cd8c5181402f52a2e9d

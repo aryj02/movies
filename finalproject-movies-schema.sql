@@ -15,7 +15,7 @@ CREATE TABLE profile (
   accountId         char(9),
   profileId         char(9),                    
   pg13              char(1),
-  watchHistory      char(1),     
+  lastWatched      varchar(100),     
   primary key       (profileId),
   foreign key       (accountId) references account (userId)   
 );
@@ -27,27 +27,15 @@ CREATE TABLE movies (
   movieYear         char(4),
   directorId        char(9) not null,
   genre             varchar2(50) not null,
-<<<<<<< HEAD
   runtime           char(6),                    --if wanna do in minutes?            --forgot if keeping this in, percentage or 1-5 scale?
-  summary           varchar2(200),
-  castId            char(9),
-  avgUserRating     char(3),                   --percentage or likert scale?
-  productionCompany varchar2(50) not null,
-  primary key (movieId),
-  unique (title, movieYear),
-  foreign key (castId) references castInfo (actorId),
-  foreign key (director) references director (directorId),
-  foreign key (productionCompany) references productionCompany (productionName)
-=======
-  runtime           char(6),                    --if wanna do in minutes?
-  summary           varchar2(1000),
+  summary           varchar2(1000),               --percentage or likert scale?
   leadingActorId    char(9),
   productionCompany varchar2(50) not null,
   primary key (movieId),
-  unique (leadingActorId),
-  unique (directorId),
-  unique (productionCompany)
->>>>>>> 9652a8f463189ae94d616cd8c5181402f52a2e9d
+  unique (title, movieYear),
+  foreign key (leadingActorId) references castInfo (actorId),
+  foreign key (directorId) references director (directorId),
+  foreign key (productionCompany) references productionCompany (productionName)
 );
 
 DROP TABLE castInfo CASCADE CONSTRAINTS;
@@ -57,9 +45,8 @@ CREATE TABLE castInfo (
   actor_lname       varchar2(50) not null,
   actor_bday        date,
   movieId           char(9) not null,
-  primary key       (actor_fname, actor_lname),
-  foreign key (movieId) references movies (movieId),
-  foreign key (actorId) references movies (leadingActorId)
+  primary key       (actorId),
+  foreign key (movieId) references movies (movieId)
 );
 
 DROP TABLE director CASCADE CONSTRAINTS;
@@ -70,8 +57,7 @@ CREATE TABLE director (
   director_bday     date,
   movieId           char(9),
   primary key       (directorId),
-  foreign key (movieId) references movies (movieID),
-  foreign key (directorId) references movies (directorId)
+  foreign key (movieId) references movies (movieID)
 );
 
 DROP TABLE productionCompany CASCADE CONSTRAINTS;
@@ -80,8 +66,7 @@ CREATE TABLE productionCompany (
   movieId           char(9),
   address           varchar2(100),
   primary key       (productionName), 
-  foreign key (movieId) references movies (movieId),
-  foreign key (productionName) references movies (productionCompany)
+  foreign key (movieId) references movies (movieId)
 );
 
 DROP TABLE reviews CASCADE CONSTRAINTS;
@@ -99,36 +84,36 @@ DROP TABLE watchlater CASCADE CONSTRAINTS;
 CREATE TABLE watchLater (
   movieId           char(9),
   profileId         char(9),
+  watched           char(1),
   primary key       (movieId, profileId),
   foreign key (movieId) references movies (movieId),
   foreign key (profileId) references profile (profileId)
-<<<<<<< HEAD
 );
 
 --queries:
---get actor and actress names from castInfo using the ID variable
-
-SELECT m.title, c.fName, c.lNAME
+--get actor names from castInfo using the ID variable for the movie description
+SELECT DISTINCT m.title, actor_fname, actor_lname
 FROM castInfo c, movies m
-WHERE c.movieID = m.movieID;
+WHERE c.movieID = m.movieID AND m.title = 'The Godfather';
 
 --get average rating for movie from ratings table
 SELECT m.title, avg(r.starRating)
-FROM movies m, rating r
-GROUP BY r.movieID
-WHERE m.movieID = r.movieID;
+FROM movies m, reviews r
+WHERE m.movieID = r.movieID
+GROUP BY m.title;
 
 --get watch later list
-SELECT p.fNmae, p.lName, m.title
+SELECT p.fname, p.lname, m.title
 FROM movies m, watchLater w, profile p
-GROUP BY w.profileID
-WHERE m.movieID = w.movieID AND p.profileID = w.profileID;
+WHERE m.movieID = w.movieID AND p.profileID = w.profileID
+GROUP BY p.fname, p.lname, m.title;
+
 
 --get trending list
-SELECT m.title
+SELECT m.title, avg(r.starRating)
 FROM movies m, reviews r
-GROUP BY r.movieID
-WHERE avg(r.starRating) > 4;
-=======
-);
->>>>>>> 9652a8f463189ae94d616cd8c5181402f52a2e9d
+WHERE m.movieID = r.movieID
+GROUP BY m.title
+HAVING AVG(r.starRating) > 4;
+
+

@@ -30,13 +30,13 @@ CREATE TABLE movies (
   movieYear         char(4),
   director          char(9) not null,
   genre             varchar2(50) not null,
-  runtime           char(6),                    --if wanna do in minutes?
-  rating            char(3),                    --forgot if keeping this in, percentage or 1-5 scale?
+  runtime           char(6),                    --if wanna do in minutes?            --forgot if keeping this in, percentage or 1-5 scale?
   summary           varchar2(200),
   castId            char(9),
   avgUserRating     char(3),                   --percentage or likert scale?
   productionCompany varchar2(50) not null,
   primary key (movieId),
+  unique (title, movieYear),
   foreign key (castId) references castInfo (actorId),
   foreign key (director) references director (directorId),
   foreign key (productionCompany) references productionCompany (productionName)
@@ -84,18 +84,6 @@ CREATE TABLE reviews (
   foreign key (profileId) references profile (profileId)
 );  
 
-DROP TABLE matchPercentage CASCADE CONSTRAINTS;
-CREATE TABLE matchPercentage (
-  matchId           char(9),
-  movieId           char(9),
-  profileId         char(9),
-  watchHistory      varchar2(15),
-  suggestedMovie    varchar2(50),  --name of suggested movie title?
-  primary key       (matchId, movieId),
-  foreign key (movieId) references movies (movieId),
-  foreign key (profileId) references profile (profileId)
-);
-
 DROP TABLE watchlater CASCADE CONSTRAINTS;
 CREATE TABLE watchLater (
   movieId           char(9),
@@ -105,12 +93,27 @@ CREATE TABLE watchLater (
   foreign key (profileId) references profile (profileId)
 );
 
-DROP TABLE trendingList CASCADE CONSTRAINTS;
-CREATE TABLE trendingList (
-  movieId           char(9),
-  avgStarRating     char(5),        --percentage or 1-5 scale?
-  trendYear         char(4),       
-  genre             varchar(50),
-  primary key       (movieId, genre),
-  foreign key (movieId) references movies (movieId)
-);
+--queries:
+--get actor and actress names from castInfo using the ID variable
+
+SELECT m.title, c.fName, c.lNAME
+FROM castInfo c, movies m
+WHERE c.movieID = m.movieID;
+
+--get average rating for movie from ratings table
+SELECT m.title, avg(r.starRating)
+FROM movies m, rating r
+GROUP BY r.movieID
+WHERE m.movieID = r.movieID;
+
+--get watch later list
+SELECT p.fNmae, p.lName, m.title
+FROM movies m, watchLater w, profile p
+GROUP BY w.profileID
+WHERE m.movieID = w.movieID AND p.profileID = w.profileID;
+
+--get trending list
+SELECT m.title
+FROM movies m, reviews r
+GROUP BY r.movieID
+WHERE avg(r.starRating) > 4;
